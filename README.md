@@ -28,6 +28,8 @@ The Github action assumes the following string patterns.
 
 ### Environment secrets
 
+This pattern will widely used in most actions to validate, plan, and apply the changes.
+
 \<target account>/AWS_ACCESS_KEY_ID
 
 \<target account>/AWS_SECRET_ACCESS_KEY
@@ -47,7 +49,7 @@ If you have multiple accounts, better to use gh-cli to speed automate the creati
 
 ### Branch naming
 
-The branch name must be prefixed with the account name followed by a slash, followed by your branch label.
+The branch name must be prefixed with the account name, followed by your branch label. This pattern will be used by pr-closed.yaml.
 
 e.g.
 
@@ -57,7 +59,7 @@ git checokut -b account1/new-ec2
 
 ### Tagging
 
-The tag must be prefixed with the account name followed by any string identifier.
+The tag must be prefixed with the account name followed by any string identifier. This pattern will be used by tf-apply.yaml.
 
 e.g.
 
@@ -125,9 +127,11 @@ Note: Updates are NOT guaranteed. Depending on the resource, it will either be u
 
 On routine commits that do not contain drastic changes to the infrastructure, tagging the latest commit manually will suffice. Note that the parameter accepted must match the naming convention defined in the rollout process.
 
-## Stale state and plan file (very rare)
+## Manual plan
 
-### https://github.com/ch4dwick/terraform-devops/actions/workflows/pr-manual-merge.yaml
+Stale state and plan file (very rare)
+
+### https://github.com/ch4dwick/terraform-devops/actions/workflows/pr-manual-plan.yaml
 
 On rare occasions, a workflow might fail after pushing a new tag. First and foremost, check first if you pulled the latest codes before tagging. This will cause a stale error if you tag an older commit. If the commit is the latest and you still get a stale state plan, try generating a new tfplan file by running the plan workflow manually. You can select which environment to use from the dropdown when executing the change. Note that each environment uses different account credentials and will generate a tfplan for that account. If you select the wrong target account, the plan file will contain no changes.
 
