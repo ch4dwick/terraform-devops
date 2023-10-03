@@ -1,0 +1,30 @@
+name: Tag Latest Plan For Deployment
+on:
+  workflow_dispatch:
+    inputs:
+      tag-name:
+        description: Tag the latest build
+        required: true
+        type: string
+
+jobs:
+  tag-version:
+    name: Tagging Version ${{ inputs.tag-name }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout Latest Code
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+      - name: Tag Version ${{ inputs.tag-name}}
+        # Nothing else follows because after the tag is pushed, tag-run.yaml will be triggered.
+        id: tf-plan
+        # TODO: Modify user.name and user.email accordingly.
+        # I currently haven't figured out a way to automate this so the steps below are pretty manual.
+        run: |
+          git pull
+          git config --global user.name "youruser"
+          git config --global user.email "your@email"
+          git tag ${{ inputs.tag-name }} && git push origin ${{ inputs.tag-name }}

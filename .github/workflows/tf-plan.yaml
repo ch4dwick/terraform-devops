@@ -1,0 +1,70 @@
+name: Terraform Plan Workflow
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: The Github environment name where the AWS credentials are retrieved. AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY.
+        required: true
+        type: string
+
+jobs:
+  terraform-plan:
+    name: Validating ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      # Needed by AWS actions
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout Latest Code
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Set AWS Credentials
+        id: aws-credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+
+      - name: Setup Terraform CLI
+        id: tf-install
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        id: terraform-init
+        working-directory: ${{ inputs.environment }}
+        run: terraform init
+
+      - name: Terraform Generate Plan
+        id: tf-plan
+        working-directory: ${{ inputs.environment }}
+        # TODO: Modify the user.name and user.email here.
+        # I currently haven't figured out a way to automate this so the steps below are pretty manual.
+        run: |
+          git pull
+          terraform plan -out ../tfplan/${{ inputs.environment }}.tfplan
+          if [ "${{ github.event.pull_request.user.login }}" != "" ];
+          then
+            echo Using PR data...
+            git config --global user.name "${{ github.event.pull_request.user.login }}"
+            git config --global user.email "${{ github.event.pull_request.user.email }}"
+            git add ../tfplan/${{ inputs.environment }}.tfplan
+            git commit -m "Terraform plan for PR #${{ github.event.pull_request.number }}"
+          else
+            echo Using WF data...
+            git config --global user.name "youruser"
+            git config --global user.email "your@email"
+            git add ../tfplan/${{ inputs.environment }}.tfplan
+            git commit -m "Terraform plan from manual workflow $(date +'%Y-%m-%d')"
+          fi
+          git push
+
+      - name: Terraform Show Plan
+        id: terraform-show
+        working-directory: ${{ inputs.environment }}
+        run: terraform show ../tfplan/${{ inputs.environment }}.tfplan

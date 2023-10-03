@@ -1,0 +1,26 @@
+name: Applying Script Changes
+
+on:
+  push:
+    tags:
+      # Add a new tag for each new Terraform Infra Project
+      - "account**"
+
+jobs:
+  # Add a new job section for each new Terraform Infra Project.
+  # Also don't forget to add a new Github Environment.
+  account1:
+    if: startsWith(github.ref, 'refs/tags/account1')
+    name: Deploying account1 changes
+    uses: ./.github/workflows/tf-apply.yaml
+    secrets: inherit
+    with:
+      environment: account1
+
+  account2:
+    if: startsWith(github.ref, 'refs/tags/account2')
+    name: Deploying account2 changes
+    uses: ./.github/workflows/tf-apply.yaml
+    secrets: inherit
+    with:
+      environment: account2

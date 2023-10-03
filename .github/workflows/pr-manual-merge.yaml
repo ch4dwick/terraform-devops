@@ -1,0 +1,16 @@
+name: Plan Manual Validation
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: The Github environment name where the AWS credentials are retrieved.
+        required: true
+        type: environment
+
+jobs:
+  plan:
+    name: Generating plan for ${{ inputs.environment }}
+    uses: ./.github/workflows/tf-plan.yaml
+    secrets: inherit
+    with:
+      environment: ${{ inputs.environment }}

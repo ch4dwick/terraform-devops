@@ -1,0 +1,23 @@
+name: Pull Request Closed
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  account1:
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'account1')
+    name: Validating platform-devstg
+    uses: ./.github/workflows/tf-plan.yaml
+    secrets: inherit
+    with:
+      environment: account1
+
+  account2:
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'account2')
+    name: Validating platform-prod
+    uses: ./.github/workflows/tf-plan.yaml
+    secrets: inherit
+    with:
+      environment: account2
