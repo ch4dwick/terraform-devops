@@ -11,10 +11,10 @@ You may customize this project to suit your needs.
 ## Prerequisites
 
 - Latest version of terraform cli
-- Latest versoin of aws-cli v2
+- Latest version of aws-cli v2
 - AWS read-only permissions for DevOps working on these scripts. This ensures that they can preview the changes but not apply them.
 - AWS IAM read-write credentials for each account that this script will be applied.
-- Permissions to create Github actions.
+- Permissions to run Github actions.
 - Permissions to create and view github environment secrets.
 - PAT token with repository read-write permissions for use with manual commits in tfplan.yaml & tag-manual.yaml.
 
