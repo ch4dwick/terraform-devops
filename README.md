@@ -147,7 +147,7 @@ Update: Removing the profile key and simply using environment variable AWS_PROFI
 
 ## Stale plan file
 
-There might be instances where the latest plan file might be tagged as stale. Re-run the previous successful PR merge to generate a new one. Please contact the Platform Architect if issue persists.
+There might be instances where the latest plan file might be tagged as stale. Re-run the previous successful PR merge to generate a new one. Please contact an AWS Admin if issue persists.
 
 # References
 

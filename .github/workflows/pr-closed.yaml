@@ -8,7 +8,7 @@ on:
 jobs:
   account1:
     if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'account1')
-    name: Validating platform-devstg
+    name: Validating account1
     uses: ./.github/workflows/tf-plan.yaml
     secrets: inherit
     with:
@@ -16,7 +16,7 @@ jobs:
 
   account2:
     if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'account2')
-    name: Validating platform-prod
+    name: Validating account2
     uses: ./.github/workflows/tf-plan.yaml
     secrets: inherit
     with:
