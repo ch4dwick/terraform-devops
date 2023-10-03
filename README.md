@@ -28,7 +28,7 @@ The Github action assumes the following string patterns.
 
 ### Environment secrets
 
-This pattern will widely used in most actions to validate, plan, and apply the changes.
+This pattern will be widely used in most actions to validate, plan, and apply the changes.
 
 \<target account>/AWS_ACCESS_KEY_ID
 
@@ -45,7 +45,7 @@ account1
     AWS_SECRET_ACCESS_KEY: xxxxxxx
 ```
 
-If you have multiple accounts, better to use gh-cli to speed automate the creation of each entry.
+If you have multiple accounts, better to use gh-cli to speed automate the creation of each entry. You can also use Terraform to automate the creation of the same IAM and permissions on each AWS account that this project will maintain.
 
 ### Branch naming
 
@@ -96,28 +96,28 @@ Create / Update Resources
 terraform apply
 ```
 
-Recommend only the lead DevOps has permissions to apply changes.
+It is recommended only the lead DevOps has permissions to apply changes.
 
 Note: Updates are NOT guaranteed. Depending on the resource, it will either be updated or recreated (destroy & create).
 
 ## Typical workflow
 
-1. Create new branch prefixed with the target account the changes will be implemented.
-2. Create/Update terraform scripts.
-3. Run terraform plan to verify changes. (DevOps with full read only access can execute)
+1. Create new branch prefixed with the target account where the changes will be applied.
+2. Create/Update terraform scripts as needed.
+3. Run terraform plan to verify changes. (DevOps with full read-only access)
 4. Push changes.
 5. Create & Submit PR for review.
-6. Once merged, worfklow is triggered that runs terraform plan and pushes it to the repository in tfplan/\*\*
+6. Once merged, pr-closed.yaml action is triggered and runs terraform plan then pushes it to the repository in tfplan/\*\*
 
-- Thie Github action will generate the tfplan file but NOT execute it yet. For convenience, the tfplan output can be viewed in your [actions](actions/workflows/pr-closed.yaml).
+- The Github action will generate the tfplan file but NOT execute it yet. For convenience, the tfplan output can be viewed in your [actions](actions/workflows/pr-closed.yaml).
 
-### Optional: if senior DevOps needs to test locally.
+### Optional: If the Senior DevOps needs to test locally.
 
 7. Pull latest from main branch.
 8. Review plan file.
-9. Once confirmed, stable commit is tagged for deployment. If not, then revise plan from source branch.
+9. Once confirmed, the commit is tagged for deployment. If not, revise the plan from source branch, NEVER the main branch as any correction needs to generate a new *.tfplan.
 
-- Tagging a commit will trigger the apply action and execute the changes to the target account.
+- Tagging a commit will trigger the tf-apply.yaml action and apply the changes to the target account. The action can be cancelled as long as the apply process is not in progress. Avoid terminating the action when it is at this step as this can lead to a corrupted state.
 
 # Via GitHub Actions
 
@@ -133,7 +133,7 @@ Stale state and plan file (very rare)
 
 ### https://github.com/ch4dwick/terraform-devops/actions/workflows/pr-manual-plan.yaml
 
-On rare occasions, a workflow might fail after pushing a new tag. First and foremost, check first if you pulled the latest codes before tagging. This will cause a stale error if you tag an older commit. If the commit is the latest and you still get a stale state plan, try generating a new tfplan file by running the plan workflow manually. You can select which environment to use from the dropdown when executing the change. Note that each environment uses different account credentials and will generate a tfplan for that account. If you select the wrong target account, the plan file will contain no changes.
+On rare occasions, an action might fail after pushing a new tag. Firstly, check if you pulled the latest codes before tagging. A stale error will happen if you tag an older commit. If the commit is the latest and you still get a stale state plan, try generating a new tfplan file by running the pr-manual-plan.yaml action manually. You can select which environment to use from the dropdown when executing the change. Note that each environment uses different account credentials and will generate a tfplan for that account. If you select the wrong target account, the plan file for that account will contain no changes and will do nothing.
 
 # Caveats
 
