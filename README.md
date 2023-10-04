@@ -12,15 +12,16 @@ You may customize this project to suit your needs.
 
 - Latest version of terraform cli
 - Latest version of aws-cli v2
-- AWS read-only permissions for DevOps working on these scripts. This ensures that they can preview the changes but not apply them.
-- AWS IAM read-write credentials for each account that this script will be applied.
+- An S3 bucket in each account or a shared bucket with read and write permissions to store the Terraform state files.
+- AWS read-only permissions for DevOps working on these scripts. This ensures that they can preview the changes but not apply them. A bare minimum would at least have read access to the S3 buckets for the state files.
+- AWS IAM read-write credentials for each account that this script will be applied. A bare minimum would at least have read-write access to the S3 buckets for the state files.
 - Permissions to run Github actions.
 - Permissions to create and view github environment secrets.
 - PAT token with repository read-write permissions for use with manual commits in tfplan.yaml & tag-manual.yaml.
 
 ## Conventions
 
-This project follows a naming convention to properly execute.
+This project follows a naming convention to properly apply.
 
 Refer to [tf-plan.yaml](.github/workflows/tf-plan.yaml) and [tf-apply.yaml](.github/workflows/tf-apply.yaml).
 
@@ -107,9 +108,9 @@ Note: Updates are NOT guaranteed. Depending on the resource, it will either be u
 3. Run terraform plan to verify changes. (DevOps with full read-only access)
 4. Push changes.
 5. Create & Submit PR for review.
-6. Once merged, pr-closed.yaml action is triggered and runs terraform plan then pushes it to the repository in tfplan/\*\*
+6. Once merged, pr-closed.yaml action is triggered and generates the \<account>.tfplan then pushes it to the repository in tfplan/\*\* folder.
 
-- The Github action will generate the tfplan file but NOT execute it yet. For convenience, the tfplan output can be viewed in your [actions](actions/workflows/pr-closed.yaml).
+- The Github action will generate the tfplan file but NOT apply it. For convenience, the tfplan output can be viewed in your [actions](actions/workflows/pr-closed.yaml).
 
 ### Optional: If the Senior DevOps needs to test locally.
 
@@ -141,13 +142,15 @@ S3 Backend is broken for new sso login flow. To get around this, do not set an s
 
 Terraform state is saved in S3 Bucket backend declared in main.tf. **DO NOT DELETE** this bucket or this folder without moving the state files first. Move the state files first either locally or another folder then update your local terraform states accordingly with `terraform init -update`
 
+Local state files will **not** work with this workflow as Github needs to be able to read the state files remotely or within the same filesystem as the project.
+
 There is currently no mechanism in place that prevents a junior DevOps from tagging a commit without your knowledge. Remember that tags trigger the apply workflow. You may need to implement the security mechanism yourelf.
 
 Multi-profile Provider authentication:
 
 As of v4 there are some changes impacting the way you use profiles in Terraform. Aside from the credentials stored in a named profile and using it in the .tf script, you need to export it in the same shell where you will be running the script. Failure to do this will result in inconsistent behavior on which accounts Terraform will use.
 
-Update: Removing the profile key and simply using environment variable AWS_PROFILE is simpler.
+Removing the profile key and simply using environment variable AWS_PROFILE is simpler.
 
 ## Stale plan file
 
